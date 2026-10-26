@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사기 문자 O/X 퀴즈</title>
+<style>
+:root{--ink:#1a1a1a;--bg:#fff;--teal:#99d9d9;--peach:#ffc9a0;--tip:#fff1c2;--orange:#f26b21;--rust:#b24300;--gray:#6a6a6a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-weight:700;min-height:100vh;display:flex;flex-direction:column}
+main{flex:1;display:flex;flex-direction:column;padding:16px;max-width:760px;width:100%;margin:0 auto}
+.top{font-size:22px;color:var(--rust);margin:4px 0 10px}
+.bar{height:10px;background:#eee;border-radius:5px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--orange);width:0;transition:width .3s}
+.q{background:var(--tip);border-radius:20px;padding:22px 18px;font-size:clamp(26px,6vw,36px);line-height:1.45;text-align:center;display:flex;align-items:center;justify-content:center;min-height:210px;white-space:pre-line}
+.btns{display:flex;gap:14px;margin:16px 0}
+.btns button{flex:1;min-height:130px;border:0;border-radius:24px;font:inherit;font-size:clamp(40px,10vw,60px);cursor:pointer;color:var(--ink)}
+#bo{background:var(--teal)}#bx{background:var(--peach)}
+.btns button:disabled{opacity:.35}
+.res{display:none;border-radius:20px;padding:18px;font-size:clamp(24px,5.4vw,32px);line-height:1.5}
+.res.ok{background:#d9f0d0}.res.no{background:#ffd9d0}
+.res b{display:block;font-size:clamp(30px,7vw,42px);margin-bottom:6px}
+.next{display:none;margin-top:14px;width:100%;min-height:84px;border:0;border-radius:20px;background:var(--ink);color:#fff;font:inherit;font-size:30px;cursor:pointer}
+.home{text-align:center;padding-top:30px}
+.home h1{font-size:clamp(36px,9vw,52px);line-height:1.3;margin:20px 0}
+.home p{font-size:clamp(24px,5.5vw,30px);color:var(--gray);line-height:1.5}
+.big{margin-top:24px;width:100%;min-height:96px;border:0;border-radius:24px;background:var(--orange);color:#fff;font:inherit;font-size:36px;cursor:pointer}
+.score{font-size:clamp(60px,16vw,96px);color:var(--rust);margin:16px 0}
+.list{text-align:left;margin-top:10px}
+.row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eee;font-size:clamp(20px,4.6vw,26px);line-height:1.4}
+.tag{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
+.tag.ok{background:#3a9d3a}.tag.no{background:#d9452b}
+.tip{background:var(--tip);border-radius:16px;padding:14px;margin-top:18px;font-size:clamp(22px,5vw,28px);line-height:1.5}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var Q=[
+["\"택배 주소가 불분명합니다. 링크를 눌러 확인하세요\"\n이 문자는 진짜 택배사가 보냈다","X","링크로 정보를 입력하게 하는 대표적인 스미싱이에요. 택배는 택배사 앱이나 송장 번호로 직접 확인해요."],
+["문자 속 링크를 눌러 앱을 설치하라고 하면\n의심해야 한다","O","이상한 앱이 깔리면 개인정보와 문자를 빼갈 수 있어요. 앱 설치 차단 설정이 도움이 돼요."],
+["자녀가 \"폰이 고장 나서 문자해요\"라며\n돈을 보내 달라고 하면 바로 보낸다","X","가족을 사칭하는 사기예요. 평소 알던 번호로 전화해서 목소리로 먼저 확인해요."],
+["경찰이나 검찰이 전화나 문자로\n계좌 정보를 요구하는 일은 없다","O","수사기관은 전화나 문자로 돈이나 계좌 정보를 요구하지 않아요. 끊고 가족이나 118·1332에 물어요."],
+["\"해외 결제 완료\" 문자에 적힌 번호로\n전화해서 취소해야 한다","X","문자에 적힌 번호는 사기범에게 연결될 수 있어요. 카드 뒷면이나 공식 앱의 번호로 확인해요."],
+["비밀번호가 없는 공개 와이파이에서\n은행 앱에 로그인해도 안전하다","X","공개 와이파이에서는 통장·카드·주민번호 같은 중요한 정보를 입력하지 않아요."],
+["이상한 문자는 화면을 캡처해\n가족에게 보여 주고 물어보는 것이 좋다","O","혼자 판단하지 않는 것이 가장 안전해요. 캡처 기능을 바로 쓸 수 있어요."],
+["이미 링크를 눌렀지만 아무 일도 없으니\n그냥 두면 된다","X","눌렀다면 바로 가족이나 상담 기관(118, 1332)에 알리고 도움을 받아요. 계좌 정보를 넣었다면 바로 은행에 연락해요."]
+];
+var app=document.getElementById('app'),i=0,mine=[];
+function home(){
+ i=0;mine=[];
+ app.innerHTML='<div class="home"><div class="top">수정노인복지관 · 1강</div><h1>사기 문자<br>O/X 퀴즈</h1><p>'+Q.length+'문제예요.<br>짝과 의논하고 답을 눌러요.</p><button class="big" id="go">시작하기</button></div>';
+ document.getElementById('go').onclick=show;
+}
+function show(){
+ app.innerHTML='<div class="top">문제 '+(i+1)+' / '+Q.length+'</div><div class="bar"><i style="width:'+(i/Q.length*100)+'%"></i></div><div class="q"></div><div class="btns"><button id="bo">O</button><button id="bx">X</button></div><div class="res" id="res"></div><button class="next" id="nx"></button>';
+ app.querySelector('.q').textContent=Q[i][0];
+ document.getElementById('bo').onclick=function(){ans('O')};
+ document.getElementById('bx').onclick=function(){ans('X')};
+}
+function ans(a){
+ mine[i]=a;
+ var ok=a===Q[i][1],r=document.getElementById('res');
+ document.getElementById('bo').disabled=document.getElementById('bx').disabled=true;
+ r.className='res '+(ok?'ok':'no');r.style.display='block';
+ r.innerHTML='<b>'+(ok?'맞아요!':'아니에요')+' 정답은 '+Q[i][1]+'</b><span></span>';
+ r.querySelector('span').textContent=Q[i][2];
+ var n=document.getElementById('nx');n.style.display='block';
+ n.textContent=i<Q.length-1?'다음 문제':'결과 보기';
+ n.onclick=function(){i++;i<Q.length?show():end()};
+ r.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function end(){
+ var s=0,h='';
+ for(var k=0;k<Q.length;k++){var ok=mine[k]===Q[k][1];if(ok)s++;
+  h+='<div class="row"><span class="tag '+(ok?'ok':'no')+'">'+(ok?'O':'X')+'</span><span>'+(k+1)+'번 정답 '+Q[k][1]+'</span></div>';}
+ app.innerHTML='<div class="home"><div class="top">결과</div><div class="score">'+s+' / '+Q.length+'</div><p>'+(s>=7?'아주 잘하셨어요!':s>=5?'잘하셨어요!':'괜찮아요. 한 번 더 해 봐요.')+'</p><div class="list">'+h+'</div><div class="tip">오늘의 한마디<br>누르지 않는다, 끊는다, 확인한다.</div><button class="big" id="re">다시 풀기</button></div>';
+ document.getElementById('re').onclick=home;
+}
+home();
+</script>
+</body>
+</html>
